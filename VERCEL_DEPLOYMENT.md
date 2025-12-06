@@ -136,6 +136,77 @@ curl -X POST https://gestor-productos.vercel.app/auth/login \
 - Asegúrate de que `firebaseKey.json` está en `.gitignore`
 - Configura credenciales como variables de entorno en Vercel
 
+## Añadir variables sensibles en Vercel (Dashboard y CLI)
+
+### Opción A — Dashboard (recomendado para la mayoría)
+
+1. Ve a tu proyecto en Vercel: `https://vercel.com/bernardo-carlos-cameras-projects/gestor-productos`
+2. En el menú lateral, selecciona **Settings → Environment Variables**.
+3. Añade las siguientes variables para el entorno `Production` (marca **Environment**: Production):
+
+  - `FIREBASE_KEY_BASE64`: pega aquí la cadena base64 completa del JSON de la cuenta de servicio (sensible).
+  - `JWT_SECRET`: tu clave secreta para firmar tokens (sensible).
+
+4. Marca ambas variables como **Encrypted** / **Protected** si Vercel lo ofrece.
+5. Después de añadirlas, redeploy del proyecto (Dashboard → Deployments → Redeploy).
+
+> Nota: la cadena `FIREBASE_KEY_BASE64` es larga; pégala como una sola línea sin saltos de línea.
+
+### Opción B — CLI (no interactiva)
+
+Puedes añadir variables por CLI desde tu máquina local (ya autenticada con `vercel login`). Ejemplos:
+
+```powershell
+# Añadir FIREBASE_KEY_BASE64 (producción)
+echo $env:FIREBASE_KEY_BASE64_VALUE | vercel env add FIREBASE_KEY_BASE64 production
+
+# Añadir JWT_SECRET (producción)
+echo "tu_clave_secreta_muy_segura_cambiar_en_produccion_12345" | vercel env add JWT_SECRET production
+```
+
+Si la variable ya existe en cualquier ambiente, primero elimínala y vuelve a añadirla:
+
+```powershell
+vercel env rm FIREBASE_KEY_BASE64 --yes
+vercel env add FIREBASE_KEY_BASE64 production
+```
+
+### Comprobaciones finales
+
+- Asegúrate de que `FIREBASE_KEY_BASE64` y `JWT_SECRET` aparecen en **Settings → Environment Variables** para `Production`.
+- Haz un `vercel --prod` o utiliza el botón **Redeploy** en el Dashboard.
+- Revisa logs en Dashboard → Functions para verificar la inicialización de Firebase.
+
+## Probar en Postman
+
+1. Abre Postman y crea una nueva colección llamada `gestor-productos`.
+2. Crea una variable de colección `base_url` con el valor de tu deployment, por ejemplo:
+
+   - `https://gestor-productos-51bksp6cx-bernardo-carlos-cameras-projects.vercel.app`
+
+3. Importa la colección `postman/gestor-productos.postman_collection.json` desde el repositorio (o crea las requests manualmente):
+
+   - `POST {{base_url}}/auth/login` → Body JSON: `{ "email": "test@gmail.com", "password": "123456" }` (guardará `token` en variable)
+   - `GET {{base_url}}/products` → Lista productos (sin auth)
+   - `POST {{base_url}}/products/create` → Body JSON para crear producto (añade header `Authorization: Bearer {{token}}`)
+
+4. Para automatizar la extracción del token después del login, añade un test en la request `auth/login` en Postman:
+
+```javascript
+pm.test('Save token', function () {
+  var json = pm.response.json();
+  if (json && json.token) {
+    pm.collectionVariables.set('token', json.token);
+  }
+});
+```
+
+5. Asegúrate de usar `Authorization: Bearer {{token}}` en las requests protegidas.
+
+### Notas
+- Si tu deployment sigue mostrando la pantalla de autenticación, desactiva Deployment Protection o usa el bypass token (ver sección anterior).
+- La colección de Postman incluida usa variables para que puedas cambiar `base_url` fácilmente.
+
 ## Monitoreo y logs
 
 En el dashboard de Vercel:

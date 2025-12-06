@@ -1,0 +1,89 @@
+{
+  "info": {
+    "_postman_id": "gestor-productos-collection",
+    "name": "gestor-productos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"email\": \"test@gmail.com\", \"password\": \"123456\" }"
+        },
+        "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth","login"] }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var json = pm.response.json();",
+              "if (json && json.token) {",
+              "  pm.collectionVariables.set('token', json.token);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products - List",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Products - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Cámara Sony A7III\", \"price\": 1999.99, \"stock\": 5 }"
+        },
+        "url": { "raw": "{{base_url}}/products/create", "host": ["{{base_url}}"], "path": ["products","create"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Products - Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"price\": 1799.99 }" },
+        "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products",":id"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Products - Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products",":id"] }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "https://gestor-productos-51bksp6cx-bernardo-carlos-cameras-projects.vercel.app" },
+    { "key": "token", "value": "" }
+  ]
+}
