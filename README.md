@@ -305,11 +305,26 @@ curl -X DELETE http://localhost:3000/products/docId \
 
 ### Vercel
 
-El proyecto incluye `vercel.json` para deploy en Vercel.
+El proyecto está configurado para despliegue en Vercel con archivo `vercel.json`.
 
+**Pasos rápidos:**
+1. Conecta tu repositorio a [Vercel](https://vercel.com)
+2. Vercel detectará automáticamente `vercel.json`
+3. Añade variable de entorno `JWT_SECRET` en el dashboard
+4. ¡Listo! Deploy en minutos
+
+**Probar localmente:**
 ```bash
-vercel
+npm install -g vercel
+vercel dev    # Simula producción en http://localhost:3000
 ```
+
+**URL en producción:**
+```
+https://gestor-productos.vercel.app
+```
+
+Para guía completa, ver `VERCEL_DEPLOYMENT.md`
 
 ## 📞 Solución de Problemas
 
