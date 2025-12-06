@@ -1,12 +1,8 @@
-// api/index.js - Serverless function for Vercel
-import app from '../src/app.js';
+// index.js (solo para desarrollo local)
+import app from './src/app.js';
 
-// Log para debug en Vercel
-console.log('[Vercel] API handler initialized');
-console.log('[Vercel] Environment variables available:', {
-  hasFirebaseKey: !!process.env.FIREBASE_KEY_BASE64,
-  hasJWT: !!process.env.JWT_SECRET,
-  nodeEnv: process.env.NODE_ENV
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor Express escuchando en http://localhost:${PORT}`);
 });
-
-export default app;

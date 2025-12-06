@@ -1,56 +1,63 @@
 // src/services/productService.js
 
 import {
-    getAllProducts as modelGetAllProducts,
-    getProductById as modelGetProductById,
-    addProduct as modelAddProduct,
-    deleteProduct as modelDeleteProduct,
-    updateProduct as modelUpdateProduct
+    getAllProducts as modelGetAll,
+    getProductById as modelGetById,
+    addProduct as modelAdd,
+    deleteProduct as modelDelete,
+    updateProduct as modelUpdate,
+    replaceProduct as modelReplace
 } from "../models/productModel.js";
 
-// Obtener todos los productos
+// GET
 export async function getAllProducts() {
-    return modelGetAllProducts();
+    return modelGetAll();
 }
 
-// Obtener producto por ID
+// GET by ID
 export async function getProductById(id) {
-    if (!id) {
-        throw new Error("El ID es obligatorio");
-    }
-
-    return modelGetProductById(id);
+    if (!id) throw new Error("El ID es obligatorio");
+    return modelGetById(id);
 }
 
-// Crear producto
+// POST
 export async function createProduct(data) {
-    if (!data.title) {
+    if (!data.title)
         throw new Error("El producto debe tener un título.");
-    }
-    if (!data.price || isNaN(data.price)) {
+    if (!data.price || isNaN(data.price))
         throw new Error("El producto debe tener un precio válido.");
-    }
 
-    return modelAddProduct(data);
+    return modelAdd(data);
 }
 
-// Eliminar producto
+// DELETE
 export async function deleteProduct(id) {
-    if (!id) {
-        throw new Error("El ID es obligatorio");
-    }
-
-    return modelDeleteProduct(id);
+    if (!id) throw new Error("El ID es obligatorio");
+    return modelDelete(id);
 }
 
-// Actualizar producto
+// PATCH
 export async function updateProduct(id, data) {
-    if (!id) {
-        throw new Error("El ID es obligatorio");
-    }
-    if (!data || Object.keys(data).length === 0) {
+    if (!id) throw new Error("El ID es obligatorio");
+    if (!data || Object.keys(data).length === 0)
         throw new Error("Los datos a actualizar son obligatorios");
+
+    return modelUpdate(id, data);
+}
+
+// PUT (reemplazo completo)
+export async function replaceProduct(id, data) {
+    if (!id) {
+        const err = new Error("El ID es obligatorio");
+        err.code = "VALIDATION";
+        throw err;
     }
 
-    return modelUpdateProduct(id, data);
+    if (!data.title || data.price === undefined || !data.description) {
+        const err = new Error("PUT requiere title, price y description");
+        err.code = "VALIDATION";
+        throw err;
+    }
+
+    return modelReplace(id, data);
 }

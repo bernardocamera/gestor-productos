@@ -27,8 +27,9 @@ if (process.env.FIREBASE_KEY_BASE64) {
     throw error;
   }
 } else {
-  const configPath1 = join(__dirname, "config", "firebaseKey.json");
-  const configPath2 = join(__dirname, "config", "firebaseKey.json.local");
+const configPath1 = join(__dirname, "..", "config", "firebaseKey.json");
+const configPath2 = join(__dirname, "..", "config", "firebaseKey.json.local");
+
   
   console.log('[Firebase] FIREBASE_KEY_BASE64 not found, trying local files');
   

@@ -7,6 +7,7 @@ import db from "../data/data.js";
 // ======================================================
 export async function getAllProducts() {
     const snapshot = await db.collection("productos").get();
+
     return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -21,7 +22,9 @@ export async function getProductById(id) {
     const docSnap = await docRef.get();
 
     if (!docSnap.exists) {
-        throw new Error(`Documento con ID ${id} no encontrado`);
+        const err = new Error(`Documento con ID ${id} no encontrado`);
+        err.code = "NOT_FOUND";
+        throw err;
     }
 
     return { id: docSnap.id, ...docSnap.data() };
@@ -39,51 +42,55 @@ export async function addProduct(data) {
 // Eliminar un documento por ID
 // ======================================================
 export async function deleteProduct(id) {
-    try {
-        const docRef = db.collection("productos").doc(id);
-        const docSnap = await docRef.get();
+    const docRef = db.collection("productos").doc(id);
+    const snap = await docRef.get();
 
-        if (!docSnap.exists) {
-            const error = new Error(`Documento con ID ${id} no encontrado`);
-            error.code = 'NOT_FOUND';
-            throw error;
-        }
-
-        await docRef.delete();
-        return { message: `Documento ${id} eliminado correctamente` };
-    } catch (error) {
-        if (error.code === 'NOT_FOUND' || error.message.includes('no encontrado')) {
-            const notFoundError = new Error(`Documento con ID ${id} no encontrado`);
-            notFoundError.code = 'NOT_FOUND';
-            throw notFoundError;
-        }
-        throw error;
+    if (!snap.exists) {
+        const err = new Error(`Documento con ID ${id} no encontrado`);
+        err.code = "NOT_FOUND";
+        throw err;
     }
+
+    await docRef.delete();
+
+    return { message: `Documento ${id} eliminado correctamente` };
 }
 
 // ======================================================
-// Actualizar un documento por ID
+// PATCH → Actualizar parcialmente
 // ======================================================
 export async function updateProduct(id, data) {
-    try {
-        const docRef = db.collection("productos").doc(id);
-        const docSnap = await docRef.get();
+    const docRef = db.collection("productos").doc(id);
+    const snap = await docRef.get();
 
-        if (!docSnap.exists) {
-            const error = new Error(`Documento con ID ${id} no encontrado`);
-            error.code = 'NOT_FOUND';
-            throw error;
-        }
-
-        await docRef.update(data);
-        const updatedSnap = await docRef.get();
-        return { id: updatedSnap.id, ...updatedSnap.data() };
-    } catch (error) {
-        if (error.code === 'NOT_FOUND' || error.message.includes('no encontrado')) {
-            const notFoundError = new Error(`Documento con ID ${id} no encontrado`);
-            notFoundError.code = 'NOT_FOUND';
-            throw notFoundError;
-        }
-        throw error;
+    if (!snap.exists) {
+        const err = new Error(`Documento con ID ${id} no encontrado`);
+        err.code = "NOT_FOUND";
+        throw err;
     }
+
+    await docRef.update(data);
+
+    const updated = await docRef.get();
+
+    return { id: updated.id, ...updated.data() };
+}
+
+// ======================================================
+// PUT → Reemplazar COMPLETAMENTE el producto
+// ======================================================
+export async function replaceProduct(id, data) {
+    const docRef = db.collection("productos").doc(id);
+    const snap = await docRef.get();
+
+    if (!snap.exists) {
+        const err = new Error(`Documento con ID ${id} no encontrado`);
+        err.code = "NOT_FOUND";
+        throw err;
+    }
+
+    // set() reemplaza todo (equivalente a PUT)
+    await docRef.set(data);
+
+    return { id, ...data };
 }
