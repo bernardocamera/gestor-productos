@@ -1,12 +1,16 @@
-// index.js (solo para desarrollo local)
-import app from './src/app.js';
+// src/app.js
+import express from "express";
+import productRoutes from "./routes/productRoutes.js";
+import authRoutes from "./routes/authRoutes.js"; // si lo tenés
 
-import dotenv from "dotenv";
-dotenv.config();
+const app = express();
 
+app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+// rutas
+app.use("/products", productRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Servidor Express escuchando en http://localhost:${PORT}`);
-});
+app.use("/auth", authRoutes); // si corresponde
+
+export default app;
+
