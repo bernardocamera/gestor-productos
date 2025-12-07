@@ -1,42 +1,68 @@
-# Gestor de Productos
+# 🛒 Gestor de Productos
 
-Sistema de gestión de productos con autenticación JWT construido con Node.js, Express y Firebase.
+> Sistema de gestión de productos con autenticación JWT, construido con Node.js, Express y Firebase Firestore. Deployado en Vercel con soporte serverless.
 
-## 📋 Características
+[![Node.js](https://img.shields.io/badge/Node.js-v18+-green.svg)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
+[![Firebase](https://img.shields.io/badge/Firebase-Admin-orange.svg)](https://firebase.google.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black.svg)](https://vercel.com/)
 
-### Autenticación
-- **JWT (JSON Web Tokens)** para autenticación segura
-- **Credenciales hardcodeadas** para desarrollo:
-  - Email: `test@gmail.com`
-  - Contraseña: `123456`
-- Tokens con expiración de 2 horas
-- Middleware de autenticación para proteger rutas
+## 📋 Tabla de Contenidos
 
-### Gestión de Productos
-- **Obtener todos los productos** - Acceso público
-- **Obtener producto por ID** - Acceso público
-- **Crear producto** - Requiere autenticación
-- **Eliminar producto** - Requiere autenticación
-- Integración con **Firebase Firestore** para almacenamiento en la nube
+- [Características](#-características)
+- [Tecnologías](#️-tecnologías)
+- [Instalación Local](#-instalación-local)
+- [Configuración](#️-configuración)
+- [Uso](#-uso)
+- [Documentación](#-documentación)
+- [Deploy](#-deploy-en-vercel)
+- [Pruebas](#-pruebas-con-postman)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Contribución](#-contribución)
 
-### Infraestructura
-- **Express.js** como framework web
-- **CORS** habilitado para peticiones de origen cruzado
-- **body-parser** para interpretar JSON en el cuerpo de peticiones
-- **dotenv** para variables de entorno
-- **firebase-admin** para conexión a Firestore
-- Middleware 404 personalizado
+## ✨ Características
 
-## 🚀 Instalación
+### 🔐 Autenticación JWT
+- Tokens seguros con expiración de 2 horas
+- Middleware de autenticación para rutas protegidas
+- Validación de credenciales con bcrypt
+- Headers Authorization Bearer
 
-### Requisitos
-- Node.js v14 o superior
-- npm v6 o superior
+### 📦 Gestión de Productos
+- CRUD completo (Create, Read, Update, Delete)
+- Almacenamiento en Firebase Firestore
+- Validación de datos
+- Endpoints públicos y protegidos
 
-### Pasos
+### 🚀 Infraestructura
+- **Express.js** - Framework web rápido y minimalista
+- **Firebase Firestore** - Base de datos NoSQL en tiempo real
+- **CORS** - Peticiones cross-origin habilitadas
+- **Serverless** - Deployado en Vercel con funciones serverless
+- **Environment Variables** - Configuración segura
 
-1. **Clonar o descargar el proyecto**
+## 🛠️ Tecnologías
+
+- **Runtime:** Node.js v18+
+- **Framework:** Express.js 4.x
+- **Base de Datos:** Firebase Firestore
+- **Autenticación:** JSON Web Tokens (JWT)
+- **Deploy:** Vercel
+- **Herramientas:** dotenv, body-parser, cors
+
+## 🚀 Instalación Local
+
+### Requisitos Previos
+- Node.js v18 o superior
+- npm v8 o superior
+- Cuenta de Firebase (para Firestore)
+- Git
+
+### Pasos de Instalación
+
+1. **Clonar el repositorio**
 ```bash
+git clone https://github.com/bernardocamera/gestor-productos.git
 cd gestor-productos
 ```
 
@@ -46,58 +72,164 @@ npm install
 ```
 
 3. **Configurar variables de entorno**
-Crea un archivo `.env` en la raíz del proyecto:
-```
-PORT=3000
-JWT_SECRET=tu_clave_secreta_muy_segura_cambiar_en_produccion_12345
+```bash
+cp .env.example .env
 ```
 
-4. **Ejecutar el servidor**
+Edita `.env` con tus valores:
+```env
+PORT=3000
+JWT_SECRET=tu_clave_secreta_muy_segura_cambiar_en_produccion_12345
+FIREBASE_KEY_BASE64=<tu_firebase_key_en_base64>
+NODE_ENV=development
+```
+
+4. **Configurar Firebase**
+- Coloca tu archivo `firebaseKey.json` en `src/config/`
+- O usa la variable `FIREBASE_KEY_BASE64` (recomendado)
+
+5. **Iniciar el servidor**
 ```bash
-npm run start
+npm start
 ```
 
 El servidor estará disponible en `http://localhost:3000`
 
-## 📚 Endpoints de la API
+## ⚙️ Configuración
 
-### Autenticación
+### Variables de Entorno
 
-#### Login
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `PORT` | Puerto del servidor | `3000` |
+| `JWT_SECRET` | Clave secreta para JWT | `mi_clave_super_segura_123` |
+| `FIREBASE_KEY_BASE64` | Credenciales Firebase en base64 | `ew0KICAidHlwZSI6...` |
+| `NODE_ENV` | Entorno de ejecución | `development` / `production` |
+
+### Credenciales de Desarrollo
+
+Para pruebas locales (hardcodeadas):
+- **Email:** `test@gmail.com`
+- **Password:** `123456`
+
+## 🎯 Uso
+
+### Endpoints Disponibles
+
+| Método | Ruta | Autenticación | Descripción |
+|--------|------|---------------|-------------|
+| `POST` | `/auth/login` | No | Obtener token JWT |
+| `GET` | `/products` | No | Listar todos los productos |
+| `GET` | `/products/:id` | No | Obtener producto por ID |
+| `POST` | `/products/create` | **Sí** | Crear nuevo producto |
+| `PATCH` | `/products/:id` | **Sí** | Actualizar producto |
+| `DELETE` | `/products/:id` | **Sí** | Eliminar producto |
+
+### Ejemplo Rápido
+
+```bash
+# 1. Obtener token
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@gmail.com","password":"123456"}'
+
+# 2. Listar productos
+curl http://localhost:3000/products
+
+# 3. Crear producto (con token)
+curl -X POST http://localhost:3000/products/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <tu_token>" \
+  -d '{"name":"Cámara Sony","price":1999.99,"stock":5}'
 ```
-POST /auth/login
-Content-Type: application/json
 
-{
-  "email": "test@gmail.com",
-  "password": "123456"
-}
+## 📚 Documentación
+
+- **[API Documentation](./API_DOCUMENTATION.md)** - Documentación completa de endpoints con ejemplos
+- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Guía paso a paso para deploy en Vercel
+- **[Postman Collection](./postman/gestor-productos.postman_collection.json)** - Colección lista para importar
+
+## 🌐 Deploy en Vercel
+
+El proyecto está configurado para deployment automático en Vercel:
+
+1. Conecta tu repositorio a Vercel
+2. Configura las variables de entorno en Vercel Dashboard
+3. Deploy automático con cada push a `main`
+
+Ver guía completa: [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+
+**URL de Producción:** `https://gestor-productos-[hash].vercel.app`
+
+## 🧪 Pruebas con Postman
+
+1. Importa la colección desde `postman/gestor-productos.postman_collection.json`
+2. Configura la variable `base_url`:
+   - Local: `http://localhost:3000`
+   - Producción: `https://gestor-productos-[hash].vercel.app`
+3. Ejecuta la request `Auth - Login` para obtener el token
+4. El token se guarda automáticamente para requests protegidas
+
+## 📁 Estructura del Proyecto
+
+```
+gestor-productos/
+├── api/
+│   └── index.js              # Entry point para Vercel serverless
+├── src/
+│   ├── app.js                # Configuración de Express
+│   ├── auth/
+│   │   └── jwt.js            # Utilidades JWT
+│   ├── config/
+│   │   └── firebaseKey.json  # Credenciales Firebase (no versionado)
+│   ├── controllers/
+│   │   └── productController.js
+│   ├── data/
+│   │   └── data.js           # Inicialización Firebase
+│   ├── middlewares/
+│   │   └── authMiddleware.js # Validación JWT
+│   ├── models/
+│   │   └── productModel.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   └── productRoutes.js
+│   └── services/
+│       └── productService.js
+├── postman/
+│   └── gestor-productos.postman_collection.json
+├── index.js                  # Entry point local
+├── package.json
+├── vercel.json              # Config Vercel
+├── .env.example             # Template de variables
+├── .gitignore
+├── README.md
+├── API_DOCUMENTATION.md
+└── VERCEL_DEPLOYMENT.md
 ```
 
-**Respuesta exitosa (200):**
-```json
-{
-  "message": "Login exitoso",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
+## 🤝 Contribución
 
-**Respuesta error (401):**
-```json
-{
-  "message": "Credenciales inválidas"
-}
-```
+Las contribuciones son bienvenidas. Por favor:
 
-### Productos
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-#### Obtener todos los productos
-```
-GET /products
-```
+## 📝 Licencia
 
-**Respuesta (200):**
-```json
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+
+## 👤 Autor
+
+**Bernardo Carlos Camera**
+- GitHub: [@bernardocamera](https://github.com/bernardocamera)
+- Email: bernardo.camera@dicsys.com
+
+---
+
+⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub
 [
   {
     "id": "docId1",

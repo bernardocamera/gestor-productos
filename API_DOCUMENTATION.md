@@ -1,53 +1,520 @@
-# API REST - Gestor de Productos
+# 📘 API REST - Gestor de Productos
 
-## 🚀 Iniciando el servidor
+> Documentación completa de endpoints, ejemplos y códigos de respuesta
 
-```bash
-npm run start
-```
+## 🌐 Base URL
 
-El servidor estará disponible en: **http://localhost:3000**
+- **Local:** `http://localhost:3000`
+- **Producción:** `https://gestor-productos-[hash].vercel.app`
 
----
+## 📋 Índice de Endpoints
 
-## 📋 RESUMEN DE ENDPOINTS
-
-| Método | Ruta | Protegida | Descripción |
-|--------|------|-----------|-------------|
-| POST | `/auth/login` | No | Obtener Bearer Token |
-| GET | `/products` | No | Listar todos los productos |
-| GET | `/products/:id` | No | Obtener producto por ID |
-| POST | `/products/create` | Sí | Crear nuevo producto |
-| PATCH | `/products/:id` | Sí | Actualizar producto |
-| DELETE | `/products/:id` | Sí | Eliminar producto |
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `POST` | `/auth/login` | ❌ | Obtener Bearer Token |
+| `GET` | `/products` | ❌ | Listar todos los productos |
+| `GET` | `/products/:id` | ❌ | Obtener producto por ID |
+| `POST` | `/products/create` | ✅ | Crear nuevo producto |
+| `PATCH` | `/products/:id` | ✅ | Actualizar producto parcialmente |
+| `DELETE` | `/products/:id` | ✅ | Eliminar producto |
 
 ---
 
-## 🔐 AUTENTICACIÓN
+## 🔐 Autenticación
 
-### 1. POST /auth/login - Obtener Token
+### POST /auth/login
 
-**Descripción:** Genera un JWT Bearer Token para acceder a rutas protegidas.
+Genera un JWT Bearer Token válido por 2 horas para acceder a rutas protegidas.
 
-**Credenciales:**
+**Credenciales de desarrollo:**
 - Email: `test@gmail.com`
-- Contraseña: `123456`
+- Password: `123456`
 
-**Postman:**
-- Método: POST
-- URL: `http://localhost:3000/auth/login`
-- Headers: `Content-Type: application/json`
-- Body (JSON):
-```json
+#### Request
+
+```http
+POST /auth/login HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
 {
   "email": "test@gmail.com",
   "password": "123456"
 }
 ```
 
-**Respuesta exitosa (200):**
+#### Responses
+
+**✅ 200 OK - Login exitoso**
 ```json
 {
+  "message": "Login exitoso",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiaWF0IjoxNzMzNTE2NDAwLCJleHAiOjE3MzM1MjM2MDB9.xyz..."
+}
+```
+
+**❌ 401 Unauthorized - Credenciales inválidas**
+```json
+{
+  "message": "Credenciales inválidas"
+}
+```
+
+**❌ 400 Bad Request - Datos faltantes**
+```json
+{
+  "message": "Email y contraseña son requeridos"
+}
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@gmail.com","password":"123456"}'
+```
+
+**JavaScript (Fetch)**
+```javascript
+const response = await fetch('http://localhost:3000/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'test@gmail.com',
+    password: '123456'
+  })
+});
+const data = await response.json();
+console.log(data.token);
+```
+
+**PowerShell**
+```powershell
+$body = @{ email='test@gmail.com'; password='123456' } | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:3000/auth/login" -Method POST -Body $body -ContentType 'application/json'
+```
+
+---
+
+## 📦 Productos
+
+### GET /products
+
+Obtiene la lista completa de productos. **No requiere autenticación.**
+
+#### Request
+
+```http
+GET /products HTTP/1.1
+Host: localhost:3000
+```
+
+#### Responses
+
+**✅ 200 OK**
+```json
+[
+  {
+    "id": "abc123",
+    "name": "Cámara Sony A7III",
+    "price": 1999.99,
+    "stock": 5,
+    "createdAt": "2025-12-06T20:00:00Z"
+  },
+  {
+    "id": "def456",
+    "name": "Lente Canon 50mm",
+    "price": 299.99,
+    "stock": 12,
+    "createdAt": "2025-12-05T15:30:00Z"
+  }
+]
+```
+
+**✅ 200 OK - Sin productos**
+```json
+[]
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+curl http://localhost:3000/products
+```
+
+**JavaScript**
+```javascript
+const products = await fetch('http://localhost:3000/products').then(r => r.json());
+```
+
+---
+
+### GET /products/:id
+
+Obtiene un producto específico por su ID. **No requiere autenticación.**
+
+#### Request
+
+```http
+GET /products/abc123 HTTP/1.1
+Host: localhost:3000
+```
+
+#### Responses
+
+**✅ 200 OK**
+```json
+{
+  "id": "abc123",
+  "name": "Cámara Sony A7III",
+  "price": 1999.99,
+  "stock": 5,
+  "description": "Cámara full-frame de 24MP",
+  "createdAt": "2025-12-06T20:00:00Z"
+}
+```
+
+**❌ 404 Not Found**
+```json
+{
+  "message": "Producto no encontrado"
+}
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+curl http://localhost:3000/products/abc123
+```
+
+---
+
+### POST /products/create
+
+Crea un nuevo producto. **Requiere autenticación JWT.**
+
+#### Request
+
+```http
+POST /products/create HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "name": "Cámara Sony A7III",
+  "price": 1999.99,
+  "stock": 5,
+  "description": "Cámara full-frame de 24MP"
+}
+```
+
+#### Campos
+
+| Campo | Tipo | Requerido | Descripción |
+|-------|------|-----------|-------------|
+| `name` | string | ✅ | Nombre del producto |
+| `price` | number | ✅ | Precio (>0) |
+| `stock` | number | ✅ | Cantidad en stock (>=0) |
+| `description` | string | ❌ | Descripción del producto |
+
+#### Responses
+
+**✅ 201 Created**
+```json
+{
+  "message": "Producto creado exitosamente",
+  "id": "xyz789",
+  "product": {
+    "id": "xyz789",
+    "name": "Cámara Sony A7III",
+    "price": 1999.99,
+    "stock": 5,
+    "description": "Cámara full-frame de 24MP",
+    "createdAt": "2025-12-06T21:00:00Z"
+  }
+}
+```
+
+**❌ 401 Unauthorized - Sin token**
+```json
+{
+  "message": "Token no proporcionado"
+}
+```
+
+**❌ 403 Forbidden - Token inválido**
+```json
+{
+  "message": "Token inválido o expirado"
+}
+```
+
+**❌ 400 Bad Request - Datos inválidos**
+```json
+{
+  "message": "Faltan campos requeridos: name, price, stock"
+}
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+curl -X POST http://localhost:3000/products/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "name": "Cámara Sony A7III",
+    "price": 1999.99,
+    "stock": 5,
+    "description": "Cámara full-frame"
+  }'
+```
+
+**JavaScript**
+```javascript
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+const response = await fetch('http://localhost:3000/products/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    name: 'Cámara Sony A7III',
+    price: 1999.99,
+    stock: 5
+  })
+});
+```
+
+---
+
+### PATCH /products/:id
+
+Actualiza parcialmente un producto existente. **Requiere autenticación JWT.**
+
+#### Request
+
+```http
+PATCH /products/abc123 HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "price": 1799.99,
+  "stock": 3
+}
+```
+
+#### Campos Actualizables
+
+Puedes enviar solo los campos que deseas actualizar:
+- `name` (string)
+- `price` (number, >0)
+- `stock` (number, >=0)
+- `description` (string)
+
+#### Responses
+
+**✅ 200 OK**
+```json
+{
+  "message": "Producto actualizado exitosamente",
+  "product": {
+    "id": "abc123",
+    "name": "Cámara Sony A7III",
+    "price": 1799.99,
+    "stock": 3,
+    "description": "Cámara full-frame de 24MP",
+    "updatedAt": "2025-12-06T22:00:00Z"
+  }
+}
+```
+
+**❌ 404 Not Found**
+```json
+{
+  "message": "Producto no encontrado"
+}
+```
+
+**❌ 401 Unauthorized**
+```json
+{
+  "message": "Token no proporcionado"
+}
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+curl -X PATCH http://localhost:3000/products/abc123 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"price": 1799.99, "stock": 3}'
+```
+
+---
+
+### DELETE /products/:id
+
+Elimina un producto por su ID. **Requiere autenticación JWT.**
+
+#### Request
+
+```http
+DELETE /products/abc123 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+#### Responses
+
+**✅ 200 OK**
+```json
+{
+  "message": "Producto eliminado exitosamente",
+  "id": "abc123"
+}
+```
+
+**❌ 404 Not Found**
+```json
+{
+  "message": "Producto no encontrado"
+}
+```
+
+**❌ 401 Unauthorized**
+```json
+{
+  "message": "Token no proporcionado"
+}
+```
+
+#### Ejemplos
+
+**cURL**
+```bash
+curl -X DELETE http://localhost:3000/products/abc123 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**JavaScript**
+```javascript
+await fetch(`http://localhost:3000/products/${productId}`, {
+  method: 'DELETE',
+  headers: { 'Authorization': `Bearer ${token}` }
+});
+```
+
+---
+
+## 🔑 Autenticación en Requests
+
+### Headers Requeridos
+
+Para endpoints protegidos (✅):
+
+```http
+Authorization: Bearer <tu_token_jwt>
+Content-Type: application/json
+```
+
+### Flujo Completo
+
+1. **Login** para obtener token:
+```bash
+TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@gmail.com","password":"123456"}' \
+  | jq -r '.token')
+```
+
+2. **Usar token** en requests protegidas:
+```bash
+curl http://localhost:3000/products/create \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Producto","price":100,"stock":10}'
+```
+
+---
+
+## ⚠️ Códigos de Estado HTTP
+
+| Código | Significado | Cuándo ocurre |
+|--------|-------------|---------------|
+| `200` | OK | Request exitosa |
+| `201` | Created | Recurso creado exitosamente |
+| `400` | Bad Request | Datos inválidos o faltantes |
+| `401` | Unauthorized | Token faltante o inválido |
+| `403` | Forbidden | Token expirado |
+| `404` | Not Found | Recurso no encontrado |
+| `500` | Internal Server Error | Error del servidor |
+
+---
+
+## 📝 Notas Importantes
+
+1. **Tokens JWT:** Expiran en 2 horas. Debes hacer login nuevamente después.
+2. **CORS:** Habilitado para todas las origins en desarrollo.
+3. **Validación:** Todos los campos requeridos se validan en el servidor.
+4. **IDs:** Generados automáticamente por Firebase Firestore.
+5. **Timestamps:** Todos los productos tienen `createdAt` y `updatedAt` automáticos.
+
+---
+
+## 🧪 Pruebas con Postman
+
+Importa la colección desde `postman/gestor-productos.postman_collection.json`:
+
+1. Variables de colección:
+   - `base_url`: URL del servidor
+   - `token`: Se guarda automáticamente después del login
+
+2. Test automático en login:
+```javascript
+pm.test('Save token', function () {
+  var json = pm.response.json();
+  if (json && json.token) {
+    pm.collectionVariables.set('token', json.token);
+  }
+});
+```
+
+3. Requests configuradas con `{{base_url}}` y `{{token}}`
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "Token no proporcionado"
+- Verifica que incluyas el header `Authorization: Bearer <token>`
+- El formato debe ser exacto: `Bearer` (con mayúscula) + espacio + token
+
+### Error: "Token inválido o expirado"
+- Haz login nuevamente para obtener un token fresco
+- Verifica que `JWT_SECRET` sea el mismo en local y producción
+
+### Error 500 en Vercel
+- Verifica que `FIREBASE_KEY_BASE64` y `JWT_SECRET` estén configuradas en Vercel Dashboard
+- Revisa los logs en Vercel → Functions → Runtime Logs
+
+---
+
+**Última actualización:** Diciembre 2025
   "message": "Login exitoso",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
