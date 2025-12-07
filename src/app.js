@@ -8,7 +8,8 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json());
+// NO usar JSON de forma global
+// app.use(express.json());
 
 app.use("/products", productRoutes);
 app.use("/auth", authRoutes);
@@ -17,5 +18,4 @@ app.get("/", (req, res) => {
     res.send("API OK");
 });
 
-// exportación obligatoria
 export default app;

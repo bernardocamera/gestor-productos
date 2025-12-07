@@ -14,13 +14,17 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-router.get('/', getProducts);                       // GET /products
-router.get('/:id', getProduct);                   // GET /products/:id
+// GET NO necesita body → NO usa JSON
+router.get('/', getProducts);                 
+router.get('/:id', getProduct);               
 
-router.post('/', authenticate, addProduct);       // POST /products
-router.patch('/:id', authenticate, modifyProduct); 
-router.put('/:id', authenticate, replaceProduct);
+// POST / PATCH / PUT sí necesitan JSON
+router.post('/', express.json(), authenticate, addProduct);
+
+router.patch('/:id', express.json(), authenticate, modifyProduct);
+
+router.put('/:id', express.json(), authenticate, replaceProduct);
+
 router.delete('/:id', authenticate, removeProduct);
 
 export default router;
-
