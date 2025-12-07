@@ -14,12 +14,13 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-router.get('/', getProducts);                      // GET /products
-router.get('/:id', getProduct);                  // GET /products/:id
-router.post('/create', authenticate, addProduct);  
-router.delete('/:id', authenticate, removeProduct); 
+router.get('/', getProducts);                       // GET /products
+router.get('/:id', getProduct);                   // GET /products/:id
+
+router.post('/', authenticate, addProduct);       // POST /products
 router.patch('/:id', authenticate, modifyProduct); 
-router.put('/:id', authenticate, replaceProduct); // PUT /products/:id
+router.put('/:id', authenticate, replaceProduct);
+router.delete('/:id', authenticate, removeProduct);
 
 export default router;
 
