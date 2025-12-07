@@ -4,13 +4,12 @@
   "type": "module",
 
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node index.js",
+    "dev": "node index.js",
     "build": "echo Build OK"
   },
 
   "dependencies": {
-    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.19.2",
@@ -18,9 +17,4 @@
     "firebase-admin": "^13.6.0",
     "jsonwebtoken": "^9.0.3"
   }
-}
-
-"type": "module",
-"scripts": {
-  "start": "node index.js"
 }
