@@ -1,16 +1,19 @@
-// src/app.js
+// index.js
 import express from "express";
-import productRoutes from "./routes/productRoutes.js";
-import authRoutes from "./routes/authRoutes.js"; // si lo tenés
+import dotenv from "dotenv";
+
+import productRoutes from "./src/routes/productRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 
-// rutas
 app.use("/products", productRoutes);
-
-app.use("/auth", authRoutes); // si corresponde
+app.use("/auth", authRoutes);
 
 export default app;
+
 
