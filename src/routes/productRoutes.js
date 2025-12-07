@@ -1,5 +1,6 @@
 // src/routes/productRoutes.js
-import { Router } from 'express';
+import express from "express";
+import { Router } from "express";
 
 import {
     getProducts,
@@ -14,11 +15,9 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-// GET NO necesita body → NO usa JSON
 router.get('/', getProducts);                 
 router.get('/:id', getProduct);               
 
-// POST / PATCH / PUT sí necesitan JSON
 router.post('/', express.json(), authenticate, addProduct);
 
 router.patch('/:id', express.json(), authenticate, modifyProduct);
