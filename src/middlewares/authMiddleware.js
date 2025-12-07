@@ -23,10 +23,16 @@ export function authenticate(req, res, next) {
     const token = parts[1];
 
     // Verificar token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'secret_key_default'
-    );
+   const secret = process.env.JWT_SECRET;
+
+   console.log("SECRET ACTUAL:", process.env.JWT_SECRET);
+
+if (!secret) {
+    console.error("ERROR: JWT_SECRET no está definido!");
+    return res.status(500).json({ message: "Configuración del servidor incorrecta" });
+}
+
+  const decoded = jwt.verify(token, secret);
 
     req.user = decoded;
     next();

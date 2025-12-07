@@ -53,11 +53,7 @@ export async function replaceProduct(id, data) {
         throw err;
     }
 
-    if (!data.title || data.price === undefined || !data.description) {
-        const err = new Error("PUT requiere title, price y description");
-        err.code = "VALIDATION";
-        throw err;
-    }
+
 
     return modelReplace(id, data);
 }
